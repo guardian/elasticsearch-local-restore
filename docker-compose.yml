@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  elasticsearch:
+    build:
+      context: ./docker
+      args:
+        ELASTIC_SEARCH_VERSION: ${ELASTIC_SEARCH_VERSION}
+    environment:
+      - cluster.name=${CLUSTER_NAME}
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+      - ./docker/scripts/set-aws-credentials:/usr/local/bin/set-aws-credentials
+    ports:
+      - "127.0.0.1:9200:9200"
+  cerebro:
+    image: lmenezes/cerebro
+    ports:
+      - "127.0.0.1:9000:9000"
+volumes:
+  elasticsearch:
+    driver: local

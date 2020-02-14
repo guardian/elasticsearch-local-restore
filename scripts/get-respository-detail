@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPOSITORY_NAME=${1:-"s3_backup"}
+ES_ENDPOINT=${2:-"localhost:9200"}
+
+checkRepositoryExists() {
+  REMOTE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}")
+
+  if [[ "$REMOTE_RESPONSE" -ne 200 ]]; then
+    echo "Repository '$REPOSITORY_NAME' does not exist on $ES_ENDPOINT"
+    exit 1
+  fi
+
+  echo "Repository '$REPOSITORY_NAME' exists on $ES_ENDPOINT"
+}
+
+displaySnapshotDetail() {
+  SNAPSHOT=$(curl -s -X GET "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}/_all?pretty" | jq -r '.snapshots | sort_by(.start_time) | reverse[0]')
+
+  START_TIME=$(echo "$SNAPSHOT" | jq -r '.start_time')
+  SNAPSHOT_NAME=$(echo "$SNAPSHOT" | jq -r '.snapshot')
+  COUNT=$(echo "$SNAPSHOT" | jq -r '.snapshot | length')
+
+  echo "There are $COUNT snapshots available in repository '$REPOSITORY_NAME'"
+  echo "The latest snapshot was created on ${START_TIME} and is labeled ${SNAPSHOT_NAME}"
+}
+
+checkRepositoryExists
+displaySnapshotDetail

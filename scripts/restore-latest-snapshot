@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPOSITORY_NAME=${1:-"s3_backup"}
+ES_ENDPOINT=${2:-"localhost:9200"}
+
+echo "Restoring latest snapshot from repository '$REPOSITORY_NAME' into $ES_ENDPOINT"
+
+SNAPSHOT=$(curl -s -X GET "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}/_all?pretty" | jq -r '.snapshots | sort_by(.start_time) | reverse[0]')
+
+START_TIME=$(echo "$SNAPSHOT" | jq -r '.start_time')
+SNAPSHOT_NAME=$(echo "$SNAPSHOT" | jq -r '.snapshot')
+
+curl -s -H 'Content-Type: application/json' -X POST "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}/${SNAPSHOT_NAME}/_restore" -d '
+{
+  "indices": "*",
+  "ignore_unavailable": true,
+  "include_global_state": true,
+  "index_settings": {
+    "index.number_of_replicas": 0
+  }
+}
+'

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPOSITORY_NAME=${1:-"s3_backup"}
+ES_ENDPOINT=${2:-"localhost:9200"}
+
+curl -s -X GET "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}" | jq -r ".${REPOSITORY_NAME}"

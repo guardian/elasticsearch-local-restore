@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [[ $# -lt 1 ]]
+then
+  echo "Repository detail not supplied"
+  echo "Usage: $0 <PATH_TO_FILE>"
+	exit 1
+fi
+
+FILE=$1
+REPOSITORY_NAME=${2:-"s3_backup"}
+ES_ENDPOINT=${3:-"localhost:9200"}
+
+if [[ ! -f ${FILE} ]]; then
+    echo "File $FILE not found"
+    exit 1
+fi
+
+echo "Creating repository '$REPOSITORY_NAME' on $ES_ENDPOINT"
+
+curl -s -H 'Content-Type: application/json' \
+    -X PUT "http://${ES_ENDPOINT}/_snapshot/${REPOSITORY_NAME}" \
+    -d @${FILE}

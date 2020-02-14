@@ -1,0 +1,9 @@
+{
+  "type": "s3",
+  "settings": {
+    "bucket": "",
+    "base_path": "",
+    "server_side_encryption": "true",
+    "region": ""
+  }
+}
