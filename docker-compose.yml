@@ -9,6 +9,7 @@ services:
       - cluster.name=${CLUSTER_NAME}
       - xpack.security.enabled=false
       - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms3g -Xmx3g"
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
       - ./docker/scripts/set-aws-credentials:/usr/local/bin/set-aws-credentials
